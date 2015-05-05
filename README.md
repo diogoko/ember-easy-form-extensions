@@ -1,3 +1,5 @@
+Custom temporary version that replaces `vendor/ember-easy-form.js` by the [updated, Ember 1.10 ready, file](https://gist.github.com/jcope2013/8f969b6e7c8244119ef8) cited in ember-easy-form [issue #196 discussion](https://github.com/dockyard/ember-easy-form/issues/196#issuecomment-77092458).
+
 # Ember Easy Form Extensions
 
 This addon extends Ember EasyForm into the view and controller layers of your Ember CLI app to provide easy event and action handling using mixins and components. The newly accessible developer-friendly layer includes form submission handlers, components, and integration with ember-validations.

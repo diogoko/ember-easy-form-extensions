@@ -1,10 +1,12 @@
-/* WARNING: This file has been edited - it is different the original Easy Form source. Some functionality has been removed to work better with ember-easy-form-extensions and changes have been made for HTMLBars compatibility. */
-
 // ==========================================================================
 // Project:   Ember EasyForm
 // Copyright: Copyright 2013 DockYard, LLC. and contributors.
 // License:   Licensed under MIT license (see license.js)
 // ==========================================================================
+
+ // Version: 1.0.0.beta.1
+
+// Copyright: Copyright 2013 DockYard, LLC. and contributors.
 
 var EasyFormShims;
 
@@ -46,7 +48,6 @@ var EasyFormShims;
   }
 
 })();
-
 
 (function() {
 
@@ -123,8 +124,15 @@ Ember.Handlebars.registerHelper('error-field', function(property, options) {
 
 (function() {
 Ember.Handlebars.registerHelper('form-for', function(object, options) {
-  options.data.keywords.formForModelPath = object;
-  return EasyFormShims.viewHelper(this, Ember.EasyForm.Form, options);
+  var parentView = options.data.view;
+
+  EasyFormShims.viewHelper(this, Ember.EasyForm.Form, options);
+
+  var newView = parentView._childViews[parentView._childViews.length - 1];
+
+  newView._keywords.formForModelPath = object;
+
+  return newView;
 });
 
 })();
@@ -147,7 +155,7 @@ Ember.Handlebars.registerHelper('hint-field', function(property, options) {
 (function() {
 Ember.Handlebars.helpers['ember-input'] = Ember.Handlebars.helpers['input'];
 
-Ember.Handlebars.registerHelper('input', function(property, options) {
+Ember.Handlebars.registerHelper('ef-input', function(property, options) {
   if (arguments.length === 1) {
     options = property;
 
@@ -178,7 +186,7 @@ Ember.Handlebars.registerHelper('input-field', function(property, options) {
     options.hash.inputOptions = EasyFormShims.getBinding(options, 'inputOptions');
   }
 
-  var modelPath = null; // CHANGED
+  var modelPath = options.data.view.getStream('formForModelPath').value();
 
   options.hash.modelPath = modelPath;
 
@@ -187,8 +195,7 @@ Ember.Handlebars.registerHelper('input-field', function(property, options) {
   var modelPropertyPath = function(property) {
     if(!property) { return null; }
 
-    // CHANGED
-    var startsWithKeyword = options.data.keywords && !!options.data.keywords[property.split('.')[0]];
+    var startsWithKeyword = !!options.data.view._keywords[property.split('.')[0]];;
 
     if (startsWithKeyword) {
       return property;
@@ -265,7 +272,7 @@ Ember.Handlebars.registerHelper('input-field', function(property, options) {
           options.hash.type = 'number';
         } else if (propertyType(property) === 'date' || (!Ember.isNone(get(context,property)) && get(context,property).constructor === Date)) {
           options.hash.type = 'date';
-        } else if (propertyType(property) === 'boolean' || (!Ember.isNone(get(context,property)) && get(context,property).constructor === Boolean)) {
+        } else if (propertyType(property) === 'boolean' || (!Ember.isNone(context.get(property)) && get(context,property).constructor === Boolean)) {
           options.hash.checkedBinding = property;
           return EasyFormShims.viewHelper(context, Ember.EasyForm.Checkbox, options);
         }
@@ -313,17 +320,13 @@ Ember.Handlebars.registerHelper('submit', function(value, options) {
 
 })();
 
-
-
 (function() {
 
 })();
 
-
-
 (function() {
 Ember.EasyForm.BaseView = Ember.View.extend({
-  // classNameBindings: ['property'],
+  classNameBindings: ['property'],
   wrapper: function() {
     var wrapperView = this.nearestWithProperty('wrapper');
     if (wrapperView) {
@@ -345,7 +348,7 @@ Ember.EasyForm.BaseView = Ember.View.extend({
     return template || Ember.EasyForm.Config.getTemplate(name);
   },
   formForModel: function(){
-    var formForModelPath = this.get('templateData.keywords.formForModelPath');
+    var formForModelPath = this._keywords.formForModelPath;
 
     if (formForModelPath === 'context' || formForModelPath === 'controller' || formForModelPath === 'this') {
       return this.get('context');
@@ -636,7 +639,6 @@ Ember.EasyForm.processOptions = function(property, options) {
 };
 
 })();
-
 
 
 (function() {
